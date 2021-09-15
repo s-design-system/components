@@ -1,18 +1,16 @@
 /* eslint-disable no-unused-vars */
-import {
-  Component, h, Prop, Element, State, Watch,
-} from '@stencil/core';
+import { Component, h, Prop, Element, State, Watch } from '@stencil/core';
 /* eslint-enable no-unused-vars */
 
 // Typescript does not support loading of resources outside of "src"
 // So instead of a relative path we do this hack.
-import { version } from '@stencil/../../package.json';
 
-import store from '../../store'
+import store from '../../store';
 
 @Component({
   tag: 'sdds-theme',
-  styleUrl: 'theme.scss'
+  styleUrl: 'theme.scss',
+  shadow: false
 })
 export class Theme {
   /** Set the brand name that will set the theme styling for the page. */
@@ -28,17 +26,18 @@ export class Theme {
 
   @State() favicons: string[];
 
-  // Proxy objects are not supported by IE11 (not even with a polyfill), 
+  // Proxy objects are not supported by IE11 (not even with a polyfill),
   // so we need to use the store.get and store.set methods of the API to support IE11.
   @State() store = store.state;
 
   @Watch('mode')
   setName(mode) {
     const newValue = {
-      current : mode,
-      items : store.state.theme.items
-    }
-    
+      current: mode,
+      items: store.state.theme.items
+    };
+
+    console.log(newValue);
     store.set('theme', newValue);
   }
 
@@ -46,18 +45,8 @@ export class Theme {
     this.mode = mode || this.store.theme.current;
     this.currentTheme = this.store.theme.items[this.mode];
     this.favicons = this.currentTheme ? this.currentTheme.favicons : undefined;
-  }
 
-  renderFavicon() {
-    if (document.head.querySelector('link[rel=icon]')) return;
-
-    const container = document.createElement('div');
-    container.innerHTML = this.favicons.join('');
-
-    for (let i = 0; i < container.children.length; i += 1) {
-      const node = container.children[i];
-      document.head.appendChild(node.cloneNode(true));
-    }
+    console.log(this.store.theme.items);
   }
 
   componentWillLoad() {
@@ -67,8 +56,8 @@ export class Theme {
     this.setName(this.mode);
     this.setTheme();
 
-    (window as any).CorporateUi = { ...(window as any).CorporateUi, version };
-    document.documentElement.setAttribute('sdds-components-version', version);
+    (window as any).CorporateUi = { ...(window as any).CorporateUi };
+    // document.documentElement.setAttribute('sdds-components-version');
 
     if (!(this.el && this.el.nodeName)) return;
 
@@ -76,18 +65,26 @@ export class Theme {
   }
 
   render() {
-    if(this.currentTheme!==undefined && this.currentTheme['version']!==undefined) {
-      document.documentElement.setAttribute(`theme`, `scania/theme-${this.mode} v${this.currentTheme['version']}`);
+    if (
+      this.currentTheme !== undefined &&
+      this.currentTheme['version'] !== undefined
+    ) {
+      document.documentElement.setAttribute(
+        `theme`,
+        `scania/theme-${this.mode} v${this.currentTheme['version']}`
+      );
     } else {
-      document.documentElement.setAttribute(`theme`,'-')
+      document.documentElement.setAttribute(`theme`, '-');
     }
 
-    if (this.favicons) {
-      this.renderFavicon();
-    }
+    console.log(this.currentTheme);
 
     return [
-      this.currentTheme ? <style>{ this.currentTheme.components[this.tagName] }</style> : ''
+      this.currentTheme ? (
+        <style>{this.currentTheme.components[this.tagName]}</style>
+      ) : (
+        ''
+      )
     ];
   }
 }

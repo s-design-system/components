@@ -1,45 +1,27 @@
 import { Config } from '@stencil/core';
 import { sass } from '@stencil/sass';
 
-import fs from 'fs';
-import dotenvPlugin from 'rollup-plugin-dotenv';
-
-const fb = () => ({});
-const dep = fs.existsSync('./.env') ? dotenvPlugin : fb;
-
 export const config: Config = {
   namespace: 'sdds-components',
   globalScript: 'src/global.ts',
-  globalStyle: 'src/global/variables.css',
+  globalStyle: 'src/global/global-sdds.css',
   enableCache: false,
-  hashFileNames: false,
-  buildEs5: true,
-  extras: {
-    cssVarsShim: true,
-    dynamicImportShim: true,
-    shadowDomShim: true,
-    safari10: true,
-    scriptDataOpts: true,
-    appendChildSlotFix: true,
-    cloneNodeFix: false,
-    slotChildNodesFix: true,
-  },
   outputTargets: [
     {
       type: 'dist',
-      esmLoaderPath: 'loader',
+      esmLoaderPath: '../loader',
       copy: [
-        { src: '../.build/index.js', dest: 'index.js' },
-        { src: 'helpers/core.js', dest: '../core.js'},
+        { src: '../.build/theming.js', dest: './theming.js' },
+        { src: 'helpers/core.js', dest: '../core.js' }
       ]
     },
     {
-      type: 'dist-custom-elements-bundle',
+      type: 'dist-custom-elements-bundle'
     },
     {
       type: 'www',
       dir: '.www',
-      serviceWorker: null, // disable service workers
+      serviceWorker: null // disable service workers
     },
     {
       type: 'docs-json',
@@ -48,12 +30,11 @@ export const config: Config = {
     { type: 'docs-readme' }
   ],
   testing: {
-    testPathIgnorePatterns: ['/node_modules/', 'global.spec'],
+    testPathIgnorePatterns: ['/node_modules/', 'global.spec']
   },
   plugins: [
     sass({
-      includePaths: ['node_modules'],
-    }),
-    dep()
-  ],
+      includePaths: ['node_modules']
+    })
+  ]
 };
